@@ -72,15 +72,15 @@ public class Search  extends Fragment {
         if(i==0){
             return "ALL";
         }else if(i==1){
-            return "classroom_course_type";
+            return "classroom";
         }else if(i==2){
-            return "learning_course_type";
+            return "elearning";
         }else if(i==3){
-            return "mobile_course_type";
+            return "mobile";
         }else if(i==4){
-            return "webinar_course_type";
+            return "webinar";
         }else if(i==5){
-            return "learning_plan_course_type";
+            return "learning_plan";
         }else {
             return "ALL";
         }
