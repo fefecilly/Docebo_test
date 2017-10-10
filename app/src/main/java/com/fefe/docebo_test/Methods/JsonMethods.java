@@ -55,7 +55,12 @@ public class JsonMethods {
     public ArrayList<SearchItem> getSearchresults(String query,String type,Context ctx){
 
         ArrayList<SearchItem> search=new ArrayList<>();
-        StringBuilder data=getJsonString("https://demomobile.docebosaas.com/learn/v1/catalog?type[]=webinar&search_text="+query,ctx);
+        if(!type.equals("ALL")){
+            type="type[]="+type+"&";
+        }else{
+            type="";
+        }
+        StringBuilder data=getJsonString("https://demomobile.docebosaas.com/learn/v1/catalog?"+type+"search_text="+query,ctx);
         try {
             JSONObject o=new JSONObject(data.toString());
             //o=o.getJSONObject("array");
@@ -66,22 +71,19 @@ public class JsonMethods {
                 SearchItem sr=new SearchItem();
                 JSONObject item= a.getJSONObject(i);
                 sr.course_type=item.getString("item_type");
-                if(sr.course_type.equals(type)||type.equals("ALL")){
-                    sr.name=item.getString("item_name");
-                    sr.description=item.getString("item_description");
-                    sr.price=item.getString("item_price");
-                    sr.thumbnail=item.getString("item_thumbnail");
-                    search.add(sr);
-                    Log.i("Search result",sr.name+"\n"+sr.price+"\n"+sr.course_type+"\n"+sr.description+"\n"+sr.thumbnail);
-                }
+                sr.name=item.getString("item_name");
+                sr.description=item.getString("item_description");
+                sr.price=item.getString("item_price");
+                sr.thumbnail=item.getString("item_thumbnail");
+                search.add(sr);
+                Log.i("Search result",sr.name+"\n"+sr.price+"\n"+sr.course_type+"\n"+sr.description+"\n"+sr.thumbnail);
+
             }
 
             if(search.size()==0){
-                Snackbar.make(MainActivity.fab, "No items found", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Snackbar.make(MainActivity.fab, "No items found", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }else{
-                Snackbar.make(MainActivity.fab, "Found "+search.size()+" items", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Snackbar.make(MainActivity.fab, "Found "+search.size()+" items", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }
 
 
