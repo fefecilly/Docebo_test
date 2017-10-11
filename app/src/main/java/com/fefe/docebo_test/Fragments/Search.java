@@ -13,7 +13,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.fefe.docebo_test.MainActivity;
 import com.fefe.docebo_test.Methods.JsonMethods;
@@ -27,7 +26,7 @@ public class Search  extends Fragment {
     private Context ctx;
     EditText name;
     Spinner type;
-    Button search;
+    public static Button search;
     Boolean canSearch=true;
 
 
@@ -36,7 +35,7 @@ public class Search  extends Fragment {
         ctx=parent.getContext();
         View view=inflater.inflate(R.layout.fragment_search,null);
         name=(EditText)view.findViewById(R.id.search_edit_name);
-        type=(Spinner)view.findViewById(R.id.search_spinner);
+        type=(Spinner)view.findViewById(R.id.dialog_spinner_filter_type);
         search=(Button)view.findViewById(R.id.search_button);
 
         String[] spinnerArray=new String[]{"All","Classroom","Elearning","Mobile","Webinar","Learning plan"};
@@ -62,6 +61,7 @@ public class Search  extends Fragment {
                             canSearch=false;
                             JsonMethods jm = new JsonMethods();
                             jm.getSearchresults(name.getText().toString(), getType(type.getSelectedItemPosition()), ctx);
+                            setButtonText();
                             canSearch=true;
                         }
                     });
@@ -103,7 +103,14 @@ public class Search  extends Fragment {
         }
     }
 
-
+    public void setButtonText(){
+        MainActivity.main.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                search.setText("Search");
+            }
+        });
+    }
 
 
 

@@ -25,14 +25,22 @@ import android.view.MenuItem;
 import com.fefe.docebo_test.Adapters.SearchResults;
 import com.fefe.docebo_test.Fragments.Results;
 import com.fefe.docebo_test.Fragments.Search;
+import com.fefe.docebo_test.Methods.ItemComparator;
+import com.fefe.docebo_test.Methods.Methods;
 import com.fefe.docebo_test.Parcelable.SearchItem;
+import com.fefe.docebo_test.Parcelable.SortOptions;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity {
 
     public static Activity main;
     public static FloatingActionButton fab;
+    Methods m=new Methods();
+    public static SortOptions so=new SortOptions();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,29 +64,34 @@ public class MainActivity extends AppCompatActivity {
         regisisterReceiver();
         changeFragment(new Search());
 
+        so.atoz=0;
+        so.ztoa=0;
+        so.price_low_hight="low";
+        so.price_trigger="1";
+        so.type="null";
+
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_sort) {
+            if (finishedSearch){
+                m.dialogFilterAndSort(main);
+            }
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
+
 
 
     @Override
@@ -96,6 +109,11 @@ public class MainActivity extends AppCompatActivity {
                 titles.remove(titles.size()-1);
                 settitle(titles.get(titles.size() - 1),false);
             }
+
+        if(titles.size()==1) {
+            finishedSearch=false;
+        }
+
     }
 
 
@@ -120,25 +138,75 @@ public class MainActivity extends AppCompatActivity {
 
     BroadcastReceiver bReceiver;
     public static SearchResults sr;
+    ArrayList<SearchItem> myResult;
+    ArrayList<SearchItem> myResult_sorted;
+    String filterType="ALL";
+    boolean finishedSearch=false;
     public void regisisterReceiver(){
-        IntentFilter filter = new IntentFilter();
+        final IntentFilter filter = new IntentFilter();
         filter.addAction("search_completed");
+        filter.addAction("filter_sort_completed");
 
         bReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
 
                 if( intent.getAction().equals("search_completed")) {
-                    ArrayList<SearchItem> s=(ArrayList<SearchItem>)intent.getSerializableExtra("result");
-                    sr=new SearchResults(main,s);
-                    if(s.size()==1){
-                        settitle(s.size()+" item found",true);
-                    }else{
-                        settitle(s.size()+" items found",true);
-                    }
-                    changeFragment(new Results());
-                }else if(intent.getAction().equals("lll")) {
 
+                    myResult=(ArrayList<SearchItem>)intent.getSerializableExtra("result");
+                    sr=new SearchResults(main,myResult);
+                    if(myResult.size()==1){
+                        settitle(myResult.size()+" item found",true);
+                    }else{
+                        settitle(myResult.size()+" items found",true);
+                    }
+                    finishedSearch=true;
+                    changeFragment(new Results());
+
+                }else if(intent.getAction().equals("filter_sort_completed")) {
+
+
+                    myResult_sorted=(ArrayList<SearchItem>)myResult.clone();
+                    if(!so.type.equals("ALL")){
+                        ArrayList<SearchItem> temp=new ArrayList<>();
+                        for(int i=0; i<myResult_sorted.size(); i++){
+                            if(myResult_sorted.get(i).course_type.equals(so.type)){
+                                temp.add(myResult_sorted.get(i));
+                            }
+                        }
+                        myResult_sorted=(ArrayList<SearchItem>)temp.clone();
+                        temp.clear();
+                    }
+
+                    if(myResult_sorted.size()!=0) {
+                        onBackPressed();
+                        if (so.atoz == 1) {
+                            Collections.sort(myResult_sorted, new Comparator<SearchItem>() {
+                                public int compare(SearchItem o1, SearchItem o2) {
+                                    return o1.course_type.compareTo(o2.course_type);
+                                }
+                            });
+                        } else if (so.ztoa == 1) {
+                            Collections.sort(myResult_sorted, new Comparator<SearchItem>() {
+                                public int compare(SearchItem o1, SearchItem o2) {
+                                    return o2.course_type.compareTo(o1.course_type);
+                                }
+                            });
+                        }
+
+                        sr = new SearchResults(main, myResult_sorted);
+                        if (myResult_sorted.size() == 1) {
+                            settitle(myResult_sorted.size() + " item found", true);
+                        } else {
+                            settitle(myResult_sorted.size() + " items found", true);
+                        }
+                        filterType=so.type;
+                        finishedSearch = true;
+                        changeFragment(new Results());
+                    }else{
+                        so.type=filterType;
+                        Snackbar.make(MainActivity.fab, "No result after filtering", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                    }
                 }
             }
         };

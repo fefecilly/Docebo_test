@@ -6,6 +6,7 @@ import android.os.StrictMode;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 
+import com.fefe.docebo_test.Fragments.Search;
 import com.fefe.docebo_test.MainActivity;
 import com.fefe.docebo_test.Parcelable.SearchItem;
 
@@ -138,6 +139,7 @@ public class JsonMethods {
     public ArrayList<SearchItem> result(StringBuilder data,ArrayList<SearchItem> search,Context ctx){
         boolean anotherPage=true;
         while (anotherPage) {
+            setLoadingPercentage(data.toString());
             JSONArray a = getItemArray(data.toString());
             String[] pages = getPages(data.toString());
             search = scanJson(a, search);
@@ -186,7 +188,7 @@ public class JsonMethods {
             for (int i = 0; i < a.length(); i++) {
                 SearchItem sr = new SearchItem();
                 JSONObject item = a.getJSONObject(i);
-                sr.course_type = item.getString("item_type");
+                sr.course_type = item.getString("course_type");
                 sr.name = item.getString("item_name");
                 sr.description = item.getString("item_description");
                 sr.price = item.getString("item_price");
@@ -210,5 +212,40 @@ public class JsonMethods {
         }
     }
 
+    public int getNumberOfPages(String data){
+        int i=0;
+        try{
+            JSONObject o = new JSONObject(data);
+            JSONObject dat = o.getJSONObject("data");
+            i = dat.getInt("total_page_count");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return i;
+    }
 
+    public int getNumberOfCurrentPage(String data){
+        int i=0;
+        try{
+            JSONObject o = new JSONObject(data);
+            JSONObject dat = o.getJSONObject("data");
+            i = dat.getInt("current_page");
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return i;
+    }
+
+    public int getLoadingPercentage(String data){
+        return (100*getNumberOfCurrentPage(data))/getNumberOfPages(data);
+    }
+
+    public void setLoadingPercentage(final String data){
+        MainActivity.main.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Search.search.setText("Searching  "+getLoadingPercentage(data)+"%");
+            }
+        });
+    }
 }
