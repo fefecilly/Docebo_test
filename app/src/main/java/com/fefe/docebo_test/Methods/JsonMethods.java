@@ -1,6 +1,7 @@
 package com.fefe.docebo_test.Methods;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.StrictMode;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -58,7 +59,7 @@ public class JsonMethods {
         if(!type.equals("ALL")){
             type="type[]="+type+"&";
         }else{
-            type="";
+            type="$select=*&";
         }
         StringBuilder data=getJsonString("https://demomobile.docebosaas.com/learn/v1/catalog?"+type+"search_text="+query,ctx);
         try {
@@ -83,7 +84,9 @@ public class JsonMethods {
             if(search.size()==0){
                 Snackbar.make(MainActivity.fab, "No items found", Snackbar.LENGTH_LONG).setAction("Action", null).show();
             }else{
-                Snackbar.make(MainActivity.fab, "Found "+search.size()+" items", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                Intent i = new Intent("search_completed");
+                i.putExtra("result",search);
+                ctx.sendBroadcast(i);
             }
 
 
