@@ -3,6 +3,7 @@ package com.fefe.docebo_test.Fragments;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +13,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
+import com.fefe.docebo_test.MainActivity;
 import com.fefe.docebo_test.Methods.JsonMethods;
 import com.fefe.docebo_test.R;
 
@@ -25,6 +28,7 @@ public class Search  extends Fragment {
     EditText name;
     Spinner type;
     Button search;
+    Boolean canSearch=true;
 
 
     @Override
@@ -50,10 +54,23 @@ public class Search  extends Fragment {
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                InputMethodManager imm = (InputMethodManager)ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(name.getWindowToken(), 0);
-                JsonMethods jm=new JsonMethods();
-                jm.getSearchresults(name.getText().toString(),getType(type.getSelectedItemPosition()),ctx);
+                if(canSearch) {
+                    InputMethodManager imm = (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(name.getWindowToken(), 0);
+                    Thread t = new Thread(new Runnable() {
+                        public void run() {
+                            canSearch=false;
+                            JsonMethods jm = new JsonMethods();
+                            jm.getSearchresults(name.getText().toString(), getType(type.getSelectedItemPosition()), ctx);
+                            canSearch=true;
+                        }
+                    });
+                    t.start();
+                    Snackbar.make(MainActivity.fab, "Searching", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                }else{
+                    Snackbar.make(MainActivity.fab, "Wait previous result before searching again", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                }
+
             }
         });
 
