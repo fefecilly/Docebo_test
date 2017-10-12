@@ -98,8 +98,9 @@ public class Methods {
             public void onClick(View v) {
                 aToZ.setChecked(false);
                 zToA.setChecked(false);
-                so.atoz=0;
-                so.ztoa=0;
+                //so.atoz=0;
+                //so.ztoa=0;
+                filterType.setSelection(0);
             }
         });
 
@@ -107,6 +108,20 @@ public class Methods {
         dialogBuilder.setTitle("Sort and filter items by type")
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+                        if(aToZ.isChecked()){
+                            so.atoz=1;
+                        }else{
+                            so.atoz=0;
+                        }
+
+                        if(zToA.isChecked()){
+                            so.ztoa=1;
+                        }else{
+                            so.ztoa=0;
+                        }
+
+
+
                         so.type=getType(filterType.getSelectedItemPosition());
                         Intent i = new Intent("filter_sort_completed");
                         main.getApplicationContext().sendBroadcast(i);
