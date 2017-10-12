@@ -3,6 +3,7 @@ package com.fefe.docebo_test.Adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.support.v7.widget.LinearLayoutManager;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 
 import com.fefe.docebo_test.Parcelable.SearchItem;
 import com.fefe.docebo_test.R;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -84,6 +86,15 @@ public class SearchResults extends BaseAdapter {
             holder.name.setText(results.get(position).name);
             holder.type_price.setText(results.get(position).course_type+" | "+results.get(position).price);
             holder.description.setText(Html.fromHtml(results.get(position).description));
+
+            if(!results.get(position).thumbnail.equals("")&&!results.get(position).thumbnail.equals("null")) {
+                String uri = "https://" + results.get(position).thumbnail;
+                Picasso.with(activity.getApplicationContext())
+                        .load(uri)
+                        .placeholder(R.drawable.ic_placeholder)
+                        .error(R.drawable.ic_error)
+                        .into(holder.thumbnail);
+            }
 
             notifyDataSetChanged();
             convertView.setTag(holder);
