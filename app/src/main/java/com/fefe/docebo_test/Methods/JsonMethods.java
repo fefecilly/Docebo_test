@@ -237,7 +237,11 @@ public class JsonMethods {
     }
 
     public int getLoadingPercentage(String data){
-        return (100*getNumberOfCurrentPage(data))/getNumberOfPages(data);
+        try {
+            return (100 * getNumberOfCurrentPage(data)) / getNumberOfPages(data);
+        }catch (Exception e){
+            return 100;
+        }
     }
 
     public void setLoadingPercentage(final String data){
